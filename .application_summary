@@ -1,0 +1,5 @@
+{
+  "ProjectOverviewURL": "https://btp-build-eu-lqnfotzf.launchpad.cfapps.eu10.hana.ondemand.com/lcapRioForms.RioFormsLaunchpad-1.0.0/",
+  "DeployedUTCTime": "2025-09-12T01:42:08.685Z",
+  "ApplicationLogURL": "https://logs.cf.eu10-004.hana.ondemand.com/app/dashboards#/view/Overview?_g=(filters:!((query:(match_phrase:(component_name:RioForms-srv)))))"
+}

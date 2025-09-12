@@ -1,0 +1,221 @@
+_schema-version: '3.1'
+ID: RioForms
+version: 1.0.0
+description: A simple CAP project.
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+  subdomain: btp-build-eu-lqnfotzf
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - rm -rf build/dist
+        - mkdir -p build/dist
+        - rm -rf build/ui-deployer
+        - mkdir -p build/ui-deployer
+    - builder: custom
+      commands:
+        - npm install --production
+        - >-
+          bash -c "cds -v | grep 'cds-dk' || npm i --production --no-save
+          @sap/cds-dk"
+        - bash -c "export PATH=$PATH:$(pwd)/node_modules/.bin"
+        - cds build --production
+  after-all:
+    - builder: custom
+      commands:
+        - npm install
+modules:
+  - name: RioForms-rioforms.manageforms
+    type: html5
+    path: app/rioforms.manageforms
+    build-parameters:
+      builder: custom
+      commands:
+        - rm -rf dist-zip dist
+        - npm install
+        - >-
+          npx -p @ui5/cli@^3.0.0 ui5 build --dest dist
+          --include-task=generateCachebusterInfo
+        - mkdir dist-zip
+        - bash -c "cd dist && npx bestzip ../dist-zip/rioformsmanageforms.zip *"
+      _artifactName: rioformsmanageforms.zip
+      supported-platforms: []
+      build-result: dist-zip
+  - name: RioForms-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm
+      ignore:
+        - node_modules
+        - package-lock.json
+    requires:
+      - name: RioForms-service-uaa
+      - name: RioForms-service-db
+  - name: RioForms-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      memory: 256MB
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+    build-parameters:
+      builder: npm
+      ignore:
+        - node_modules
+        - package-lock.json
+    requires:
+      - name: RioForms-service-uaa
+      - name: RioForms-service-db
+      - name: RioForms-service-destination
+      - name: RioForms-service-metadata
+      - name: RioForms-service-connectivity
+      - name: RioForms-service-logs
+  - name: RioForms-aux-destinations
+    type: com.sap.application.content
+    parameters:
+      content:
+        subaccount:
+          existing_destinations_policy: update
+          destinations:
+            - Authentication: OAuth2UserTokenExchange
+              Name: RioForms-service-uaa
+              ServiceInstanceName: RioForms-uaa
+              ServiceKeyName: RioForms-uaa-key
+              sap.cloud.service: lcap.RioForms
+            - Authentication: OAuth2UserTokenExchange
+              Name: RioForms-app-srv
+              TokenServiceInstanceName: RioForms-uaa
+              TokenServiceKeyName: RioForms-uaa-key
+              URL: ~{srv-api/srv-url}
+              sap.cloud.service: lcap.RioForms
+            - Name: RioForms-service-html5-apps-repo-host
+              ServiceInstanceName: RioForms-html5-apps-repo-host
+              ServiceKeyName: RioForms-html5-apps-repo-host-key
+              sap.cloud.service: lcap.RioForms
+            - Authentication: OAuth2UserTokenExchange
+              Name: RioForms-RioFormsService
+              TokenServiceInstanceName: RioForms-uaa
+              TokenServiceKeyName: RioForms-uaa-key
+              URL: ~{srv-api/srv-url}/service/RioFormsService
+              sap.cloud.service: lcap.RioForms
+              sap.applicationdevelopment.actions.enabled: true
+              sap.build.usage: CAP
+              sap.processautomation.enabled: true
+              HTML5.DynamicDestination: true
+              WebIDEEnabled: true
+              MobileEnabled: true
+              AppgyverEnabled: true
+    build-parameters:
+      no-source: true
+    requires:
+      - name: RioForms-service-uaa
+        parameters:
+          service-key:
+            name: RioForms-uaa-key
+      - name: srv-api
+      - name: RioForms-service-html5-apps-repo-host
+        parameters:
+          service-key:
+            name: RioForms-html5-apps-repo-host-key
+      - name: RioForms-service-destination
+        parameters:
+          content-target: true
+  - name: RioForms-launchpad
+    type: html5
+    path: build/launchpad
+    build-parameters:
+      builder: custom
+      commands:
+        - npm install
+        - >-
+          npx -p @ui5/cli@^3.0.0 ui5 build --dest dist
+          --include-task=generateCachebusterInfo
+        - bash -c "cd dist && npx bestzip ../../../build/dist/launchpad.zip *"
+        - rm -rf dist
+      _artifactName: launchpad.zip
+      supported-platforms: []
+      build-result: ../../build/dist
+  - name: RioForms-aux-ui-deployer
+    type: com.sap.application.content
+    path: build/ui-deployer
+    build-parameters:
+      build-result: resources
+      requires:
+        - name: RioForms-rioforms.manageforms
+          artifacts:
+            - rioformsmanageforms.zip
+          target-path: resources
+        - name: RioForms-launchpad
+          artifacts:
+            - launchpad.zip
+          target-path: resources
+    requires:
+      - name: RioForms-service-html5-apps-repo-host
+        parameters:
+          content-target: true
+resources:
+  - type: org.cloudfoundry.managed-service
+    name: RioForms-service-uaa
+    parameters:
+      service: xsuaa
+      service-plan: application
+      service-name: RioForms-uaa
+      path: xs-security.json
+      config:
+        oauth2-configuration:
+          redirect-uris:
+            - https://${subdomain}.launchpad.${default-domain}/login/*
+            - https://${subdomain}.${default-domain}/login/*
+          credential-types:
+            - binding-secret
+            - x509
+        xsappname: RioForms-${space}
+        role-collections: []
+  - type: org.cloudfoundry.managed-service
+    name: RioForms-service-db
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+      service-name: RioForms-db
+  - type: org.cloudfoundry.managed-service
+    name: RioForms-service-destination
+    parameters:
+      service: destination
+      service-plan: lite
+      service-name: RioForms-destination
+      config:
+        HTML5Runtime_enabled: true
+        version: 1.0.0
+  - type: org.cloudfoundry.user-provided-service
+    name: RioForms-service-metadata
+    parameters:
+      service: metadata
+      service-plan: standard
+      service-name: RioForms-metadata
+      config:
+        default-domain: ${default-domain}
+  - type: org.cloudfoundry.managed-service
+    name: RioForms-service-connectivity
+    parameters:
+      service: connectivity
+      service-plan: lite
+      service-name: RioForms-connectivity
+  - type: org.cloudfoundry.managed-service
+    name: RioForms-service-logs
+    parameters:
+      service: application-logs
+      service-plan: lite
+      service-name: RioForms-logs
+  - type: org.cloudfoundry.managed-service
+    name: RioForms-service-html5-apps-repo-host
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+      service-name: RioForms-html5-apps-repo-host
