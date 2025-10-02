@@ -1,17 +1,17 @@
 namespace RioForms;
-
+using { managed } from '@sap/cds/common';
 entity Questions
 {
     key ID : UUID;
     question : String(200);
-    questionType : Association to one QuestionTypes;
-    form : Association to one Form;
-}
+    // FK you actually store & edit
+    type_code : Integer;
 
-entity QuestionTypes
-{
-    key ID : UUID;
-    type : String(15);
+    // Association for text
+    typeRef : Association to QuestionTypes
+                on typeRef.code = $self.type_code;
+
+    form : Association to one Form;
 }
 
 entity Form
@@ -23,7 +23,7 @@ entity Form
     questions : Composition of many Questions on questions.form = $self;
 }
 
-entity FormRecord
+entity FormRecord : managed
 {
     key ID : UUID;
     firstName : String(100);
@@ -39,4 +39,9 @@ entity AnswerRecord
     textAnswer : String(100);
     boolAnswer : Boolean;
     formRecord : Association to one FormRecord;
+}
+
+entity QuestionTypes {
+  key code : Integer;
+      name : String(40);
 }

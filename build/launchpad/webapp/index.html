@@ -27,7 +27,7 @@
                     return Controller.extend("PreviewController", {
                         onInit: function () {
 
-                            const data = {"Services":[{"ServiceName":"RioFormsService","DetailsURL":"./service/RioFormsService/","Metadata":"./service/RioFormsService/$metadata","Entities":[{"Name":"Form","URL":"./service/RioFormsService/Form","FioriURL":""}],"EntitiesCount":1}]}
+                            const data = {"Services":[{"ServiceName":"RioFormsService","DetailsURL":"./service/RioFormsService/","Metadata":"./service/RioFormsService/$metadata","Entities":[{"Name":"Form","URL":"./service/RioFormsService/Form","FioriURL":""},{"Name":"Questions","URL":"./service/RioFormsService/Questions","FioriURL":""},{"Name":"QuestionTypes","URL":"./service/RioFormsService/QuestionTypes","FioriURL":""},{"Name":"FormRecord","URL":"./service/RioFormsService/FormRecord","FioriURL":""},{"Name":"AnswerRecord","URL":"./service/RioFormsService/AnswerRecord","FioriURL":""}],"EntitiesCount":5},{"ServiceName":"RioFormsServiceMDK","DetailsURL":"./service/RioFormsServiceMDK/","Metadata":"./service/RioFormsServiceMDK/$metadata","Entities":[{"Name":"Form","URL":"./service/RioFormsServiceMDK/Form","FioriURL":""},{"Name":"Questions","URL":"./service/RioFormsServiceMDK/Questions","FioriURL":""},{"Name":"QuestionTypes","URL":"./service/RioFormsServiceMDK/QuestionTypes","FioriURL":""},{"Name":"FormRecord","URL":"./service/RioFormsServiceMDK/FormRecord","FioriURL":""},{"Name":"AnswerRecord","URL":"./service/RioFormsServiceMDK/AnswerRecord","FioriURL":""}],"EntitiesCount":5}]}
                             this.getView().setModel(new JSONModel(data));
                         }
                     });

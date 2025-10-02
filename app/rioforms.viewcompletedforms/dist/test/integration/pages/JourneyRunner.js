@@ -1,0 +1,2 @@
+sap.ui.define(["sap/fe/test/JourneyRunner","rioforms/viewcompletedforms/test/integration/pages/FormRecordList","rioforms/viewcompletedforms/test/integration/pages/FormRecordObjectPage"],function(e,r,o){"use strict";var t=new e({launchUrl:sap.ui.require.toUrl("rioforms/viewcompletedforms")+"/index.html",pages:{onTheFormRecordList:r,onTheFormRecordObjectPage:o},async:true});return t});
+//# sourceMappingURL=JourneyRunner.js.map

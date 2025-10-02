@@ -7,6 +7,12 @@
   },
   "routes": [
     {
+      "source": "^/service/RioFormsServiceMDK/(.*)$",
+      "target": "/service/RioFormsServiceMDK/$1",
+      "destination": "RioForms-app-srv",
+      "authenticationType": "xsuaa"
+    },
+    {
       "source": "^/service/RioFormsService/(.*)$",
       "target": "/service/RioFormsService/$1",
       "destination": "RioForms-app-srv",

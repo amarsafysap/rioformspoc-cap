@@ -13,7 +13,7 @@
     "sourceTemplate": {
       "id": "@sap/generator-fiori:lrop",
       "version": "1.18.6",
-      "toolsId": "bbc73b6f-500c-43da-a0fa-7a9b749a539a"
+      "toolsId": "1cc260cb-e7a0-48a0-846c-d5875cf19bfe"
     },
     "dataSources": {
       "mainService": {
@@ -126,10 +126,13 @@
               "controlConfiguration": {
                 "@com.sap.vocabularies.UI.v1.LineItem": {
                   "tableSettings": {
-                    "type": "ResponsiveTable"
+                    "type": "ResponsiveTable",
+                    "enableExport": true,
+                    "selectAll": true
                   }
                 }
-              }
+              },
+              "initialLoad": "Enabled"
             }
           }
         },
@@ -139,8 +142,13 @@
           "name": "sap.fe.templates.ObjectPage",
           "options": {
             "settings": {
-              "editableHeaderContent": false,
-              "contextPath": "/Form"
+              "editableHeaderContent": true,
+              "contextPath": "/Form",
+              "content": {
+                "header": {
+                  "visible": true
+                }
+              }
             }
           }
         }

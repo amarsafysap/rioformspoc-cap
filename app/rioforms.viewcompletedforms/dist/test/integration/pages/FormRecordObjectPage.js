@@ -1,0 +1,2 @@
+sap.ui.define(["sap/fe/test/ObjectPage"],function(e){"use strict";var t={actions:{},assertions:{}};return new e({appId:"rioforms.viewcompletedforms",componentId:"FormRecordObjectPage",contextPath:"/FormRecord"},t)});
+//# sourceMappingURL=FormRecordObjectPage.js.map

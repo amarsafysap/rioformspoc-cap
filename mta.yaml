@@ -43,6 +43,24 @@ modules:
       _artifactName: rioformsmanageforms.zip
       supported-platforms: []
       build-result: dist-zip
+  - name: RioForms-rioforms.viewcompletedforms
+    type: html5
+    path: app/rioforms.viewcompletedforms
+    build-parameters:
+      builder: custom
+      commands:
+        - rm -rf dist-zip dist
+        - npm install
+        - >-
+          npx -p @ui5/cli@^3.0.0 ui5 build --dest dist
+          --include-task=generateCachebusterInfo
+        - mkdir dist-zip
+        - >-
+          bash -c "cd dist && npx bestzip
+          ../dist-zip/rioformsviewcompletedforms.zip *"
+      _artifactName: rioformsviewcompletedforms.zip
+      supported-platforms: []
+      build-result: dist-zip
   - name: RioForms-db-deployer
     type: hdb
     path: gen/db
@@ -112,6 +130,19 @@ modules:
               WebIDEEnabled: true
               MobileEnabled: true
               AppgyverEnabled: true
+            - Authentication: OAuth2UserTokenExchange
+              Name: RioForms-RioFormsServiceMDK
+              TokenServiceInstanceName: RioForms-uaa
+              TokenServiceKeyName: RioForms-uaa-key
+              URL: ~{srv-api/srv-url}/service/RioFormsServiceMDK
+              sap.cloud.service: lcap.RioForms
+              sap.applicationdevelopment.actions.enabled: true
+              sap.build.usage: CAP
+              sap.processautomation.enabled: true
+              HTML5.DynamicDestination: true
+              WebIDEEnabled: true
+              MobileEnabled: true
+              AppgyverEnabled: true
     build-parameters:
       no-source: true
     requires:
@@ -151,6 +182,10 @@ modules:
         - name: RioForms-rioforms.manageforms
           artifacts:
             - rioformsmanageforms.zip
+          target-path: resources
+        - name: RioForms-rioforms.viewcompletedforms
+          artifacts:
+            - rioformsviewcompletedforms.zip
           target-path: resources
         - name: RioForms-launchpad
           artifacts:
